@@ -1,0 +1,20 @@
+parameters:
+    level: max
+    paths:
+        - .
+    bootstrapFiles:
+        - ../vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+        - ../vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
+        - ../vendor/arts/easy-digital-downloads-stubs/easy-digital-downloads-stubs.php
+        - ../edd-convertkit-stubs.php
+
+    # Tests assert class/function existence at runtime against stubs that PHPStan
+    # already knows to be true; suppress the corresponding "already-narrowed" rules
+    # without requiring them to actually fire.
+    reportUnmatchedIgnoredErrors: false
+
+    ignoreErrors:
+        - identifier: method.alreadyNarrowedType
+          path: StubSyntaxTest.php
+        - identifier: function.alreadyNarrowedType
+          path: StubSyntaxTest.php

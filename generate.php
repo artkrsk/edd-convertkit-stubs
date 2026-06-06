@@ -63,6 +63,17 @@ $finder = Finder::create()
 	->exclude( array( 'vendor', 'tests', 'node_modules', 'build', 'assets', 'languages', 'libraries', 'samples', 'templates', 'views' ) )
 	->sortByName();
 
+// EDD_ConvertKit extends \EDD\Newsletter\Base, which ships inside the plugin's bundled
+// newsletter-tool package under vendor/ (excluded above) — so without this it gets
+// empty-stubbed and its static instance() factory + the Settings/Subscribe interfaces it
+// implements go missing. Add just that one src subtree as a second Finder root (a sibling
+// `in()`, which Symfony Finder appends) so those types are captured; the rest of vendor
+// stays excluded.
+$newsletterSrc = $eddConvertkitPath . '/vendor/easydigitaldownloads/edd-newsletter-tool/src';
+if ( is_dir( $newsletterSrc ) ) {
+	$finder->in( $newsletterSrc );
+}
+
 $generator = new StubsGenerator( StubsGenerator::DEFAULT );
 $result    = $generator->generate( $finder );
 $content   = $result->prettyPrint();
@@ -72,6 +83,13 @@ $content = removeStrayCodeStatements( $content );
 
 // 2.5. Strip `abstract` from method declarations.
 $content = neutralizeAbstractMethods( $content );
+
+// 2.6. The newsletter-tool singleton factory `Base::instance()` is `return new static()`
+// but the source annotates it `@return Base`. Retype it `@return static` so subclass calls
+// (EDD_ConvertKit::instance()) resolve to the concrete class — otherwise the caller only
+// sees Base's interface-level method surface (e.g. Subscribe::subscribe_email's narrower
+// signature) instead of EDD_ConvertKit's own.
+$content = staticizeInstanceReturnType( $content );
 
 // 3. Extract version from source
 $convertkitVersion = extractConvertkitVersion( $eddConvertkitPath );
@@ -176,6 +194,20 @@ function fixMissingTypeStubs( string $content ): string {
 	}
 
 	return $content;
+}
+
+/**
+ * Rewrite the `@return` of a singleton `instance()` factory to `@return static`. The EDD
+ * newsletter-tool's `Base::instance()` body is `return new static()`, so the called class
+ * is the real return type; the source's `@return Base` masks the concrete subclass surface
+ * from callers like `EDD_ConvertKit::instance()`.
+ */
+function staticizeInstanceReturnType( string $content ): string {
+	return preg_replace(
+		'/@return\s+\S+(\s*\*\/\s*public\s+static\s+function\s+instance\s*\()/',
+		'@return static$1',
+		$content
+	);
 }
 
 /**

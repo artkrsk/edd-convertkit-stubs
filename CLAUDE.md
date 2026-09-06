@@ -55,7 +55,6 @@ Set it via `.env` file (copy from `.env.example`) or export directly.
 ### GitHub Workflows
 - `integrate.yml` — CI tests on push/PR (PHPUnit + PHPStan + PHPCS)
 - `release.yml` — Creates a GitHub Release with auto-generated notes when a `v*` tag is pushed
-- `claude.yml` / `claude-code-review.yml` — Claude Code integration for issues / PRs
 
 There is no auto-`generate.yml` (unlike the EDD core repo) because EDD ConvertKit isn't on WordPress.org — regeneration is a local `composer generate` against a maintainer's `EDD_CONVERTKIT_PATH`, then committing and pushing a `v*` tag to trigger `release.yml`.
 

@@ -32,7 +32,6 @@
   },
   "require-dev": {
     "captainhook/captainhook": "^5.27",
-    "ergebnis/composer-normalize": "^2.48",
     "php-stubs/generator": "^0.9",
     "phpstan/phpstan": "^2.0",
     "phpunit/phpunit": "^9.5",
@@ -49,8 +48,7 @@
   "minimum-stability": "stable",
   "config": {
     "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true,
-      "ergebnis/composer-normalize": true
+      "dealerdirect/phpcodesniffer-composer-installer": true
     },
     "optimize-autoloader": true,
     "platform": {
@@ -67,7 +65,6 @@
     ],
     "changelog": "git-cliff --output CHANGELOG.md",
     "generate": "@php -d memory_limit=2G generate.php",
-    "normalize": "composer-normalize",
     "test": [
       "@test:phpunit",
       "@test:phpstan",
